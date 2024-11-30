@@ -1,0 +1,24 @@
+.pageLogin {
+	width: 100%;
+	min-height: 100vh;
+	display: flex;
+	justify-content: space-between;
+}
+.block {
+	width: 50%;
+	height: auto;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+.blockLeft {
+	background-color: #000;
+	color: #fff;
+}
+
+.blockRight {
+	background-color: #fff;
+	color: #000;
+}
+
