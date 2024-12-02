@@ -1,16 +1,12 @@
 import { ReactNode } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './pages/Login';
-import ToDOList from './pages/ToDoList/ToDoList';
 import useAuthControl from './store/userAuthControl';
 import Layout from './ui/Layout/Layout';
-import { Home } from './pages/Home/Home';
-import { Register } from './pages/Register';
-
+import { Pages } from './pages';
 interface ChallengProp {
 	children: ReactNode;
 }
-const Challenge = ({ children }: ChallengProp) => {
+const ChallengeAuth = ({ children }: ChallengProp) => {
 	const isAuthenticated = useAuthControl((state) => state.isAuthenticated);
 
 	return isAuthenticated ? children : <Navigate to='/' />;
@@ -20,17 +16,19 @@ function App() {
 		<Layout>
 			<Router>
 				<Routes>
-					<Route path='/' element={<Home />} />
-					<Route path='/login' element={<Login />} />
-					<Route path='/register' element={<Register />} />
+					<Route path='/' element={<Pages.home />} />
+					<Route path='/login' element={<Pages.login />} />
+					<Route path='/register' element={<Pages.register />} />
 					<Route
 						path='/to-do-list'
 						element={
-							<Challenge>
-								<ToDOList />
-							</Challenge>
+							<ChallengeAuth>
+								<Pages.toDoList />
+							</ChallengeAuth>
 						}
 					/>
+					<Route path='/task/:id' element={<Pages.task />} />
+					<Route path='*' element={<Pages.notFound />} />
 				</Routes>
 			</Router>
 		</Layout>

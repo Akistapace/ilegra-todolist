@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import style from './style.module.css';
 import { Button } from '../../ui/Button';
-export const Home = () => {
+export const PageHome = () => {
 	const navigate = useNavigate();
 
 	const handleNavigate = (page: string) => navigate(page);

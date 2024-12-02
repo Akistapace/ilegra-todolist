@@ -1,7 +1,8 @@
 .pageLogin {
 	width: 100%;
-	min-height: 100vh;
+	height: auto;
 	display: flex;
+	flex: auto;
 	justify-content: space-between;
 }
 .block {

@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { FormLogin } from '../../components/FormLogin';
 import useAuthControl from '../../store/userAuthControl';
 import style from './style.module.css';
-function Login() {
+export const PageLogin = () => {
 	const navigate = useNavigate();
 	const login = useAuthControl((state) => state.login);
 
@@ -24,7 +24,5 @@ function Login() {
 			</div>
 		</div>
 	);
-}
-
-export default Login;
+};
 

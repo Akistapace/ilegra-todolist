@@ -1,0 +1,25 @@
+/* Estilos para o Select */
+.select {
+	margin-bottom: 16px;
+	max-width: 300px;
+}
+
+select {
+	width: 100%;
+	padding: 15px;
+	border-radius: 4px;
+	border: 1px solid #ccc;
+	outline: none;
+	font-size: 16px;
+	box-sizing: border-box;
+	font-size: 12px;
+}
+
+select:focus {
+	border-color: #4caf50;
+}
+
+select.error {
+	border-color: red;
+}
+

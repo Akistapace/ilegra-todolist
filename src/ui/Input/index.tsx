@@ -1,14 +1,14 @@
 import { UseFormRegisterReturn } from 'react-hook-form';
 import style from './style.module.css';
 
-interface Props {
-	placeholder: string;
+type Props = {
+	placeholder?: string;
 	type: string;
 	children?: React.ReactNode;
 	register?: UseFormRegisterReturn; // Tipo correto para o register
-}
+} & React.InputHTMLAttributes<HTMLInputElement>;
 
-export const Input = ({ children, placeholder, type, register }: Props) => {
+export const Input = ({ children, placeholder, type, register, ...rest }: Props) => {
 	return (
 		<div className={style.inputField}>
 			<input
@@ -16,6 +16,7 @@ export const Input = ({ children, placeholder, type, register }: Props) => {
 				placeholder={placeholder}
 				type={type}
 				{...(register || {})}
+				{...rest}
 			/>
 			{children}
 		</div>
