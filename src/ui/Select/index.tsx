@@ -7,17 +7,17 @@ interface Option {
 	value: string;
 }
 
-interface Props {
+type Props = {
 	children?: React.ReactNode;
 	register?: UseFormRegisterReturn; // Tipo correto para o register
 	options: Option[];
 	label?: string;
-}
+} & React.InputHTMLAttributes<HTMLInputElement>;
 
-export const Select: React.FC<Props> = ({ children, register, options, label }) => {
+export const Select = ({ children, register, options, label }: Props) => {
 	return (
 		<div className={style.select}>
-			{label && <label>{label}</label>}
+			{label && <label className={style.label}>{label}</label>}
 			<select {...(register || {})}>
 				{options.map((option) => (
 					<option key={option.value} value={option.value}>

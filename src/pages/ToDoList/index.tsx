@@ -1,16 +1,14 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTodoStore } from '../../store/useTodoList';
-import { Button } from '../../ui/Button';
-import { Input } from '../../ui/Input';
-import { Select } from '../../ui/Select';
-import { Modal } from '../../ui/Modal';
-import { utils } from '../../utils';
+import { debounce } from '../../utils/debounce';
+import { TableTask } from '../../components/TableTasks';
+import { Button, Input, InputFile, Modal, Select } from '../../ui';
 import { v4 as uuidv4 } from 'uuid';
 import z from 'zod';
 import style from './style.module.css';
+import { Icons } from '../../ui/Icons';
 
 const taskSchema = z.object({
 	id: z
@@ -31,6 +29,18 @@ const taskSchema = z.object({
 	status: z.enum(['Pendente', 'Concluído', 'À fazer'], {
 		errorMap: () => ({ message: 'O status deve ser Pendentee ou Concluído' }),
 	}),
+	attachment: z
+		.array(z.instanceof(File)) // Aceita um array de arquivos
+		.nullable()
+		.optional()
+		.refine(
+			(files) => !files || files.every((file) => file.type.startsWith('image/')),
+			'Todos os arquivos devem ser imagens'
+		)
+		.refine(
+			(files) => !files || files.every((file) => file.size <= 5 * 1024 * 1024),
+			'Cada arquivo deve ter no máximo 5MB'
+		),
 });
 
 type Task = z.infer<typeof taskSchema>;
@@ -49,37 +59,48 @@ const PRIORITIES = [
 
 export const PageToDOList = () => {
 	const [isOpen, setIsOpen] = useState(false);
+	const [searchTerm, setSearchTerm] = useState('');
+	const [statusFilter, setStatusFilter] = useState<string | ''>('');
+	const [priorityFilter, setPriorityFilter] = useState<string | ''>('');
+	const [dateFilter, setDateFilter] = useState<string | ''>('');
 	const [editingTask, setEditingTask] = useState<Task | null>(null);
 	const { todoList, addTask, editTask, removeTask } = useTodoStore();
-
 	const {
 		register,
 		handleSubmit,
 		reset,
+		setValue,
 		formState: { errors },
 	} = useForm<Task>({
 		resolver: zodResolver(taskSchema),
 	});
 
-	const handleCreateTask = (data: Omit<Task, 'id'>) => {
-		const newTask: Task = { ...data, id: uuidv4() };
+	const actions = {
+		remove: (id: string) => removeTask(id),
+		add: (data: Omit<Task, 'id'>) => {
+			const newTask: Task = { ...data, id: uuidv4() };
 
-		addTask(newTask);
+			addTask(newTask);
 
-		setTimeout(() => {
-			reset({
-				title: '',
-				description: '',
-				date: '',
-				priority: 'Alta',
-				status: 'Pendente',
-			});
-			setIsOpen(false);
-		}, 300);
+			setTimeout(() => {
+				reset({
+					title: '',
+					description: '',
+					date: '',
+					priority: 'Alta',
+					status: 'Pendente',
+				});
+				setIsOpen(false);
+			}, 300);
+		},
+		edit: (task: Task) => {
+			setEditingTask(task);
+			setIsOpen(true);
+			reset(task);
+		},
 	};
 
-	const handleEditTask = (data: Task) => {
-		const task = todoList?.find((task) => task.id === data.id);
+	const handleEditTask = (task: Task) => {
 		editTask(task);
 
 		setTimeout(() => {
@@ -95,21 +116,11 @@ export const PageToDOList = () => {
 		}, 300);
 	};
 
-	const handleRemove = (id: string) => {
-		removeTask(id);
-	};
-
-	const openEditForm = (task: Task) => {
-		setEditingTask(task);
-		setIsOpen(true);
-		reset(task);
-	};
-
 	const handleFormSubmit = (data: Omit<Task, 'id'>) => {
 		if (editingTask) {
 			handleEditTask({ ...data, id: editingTask.id });
 		} else {
-			handleCreateTask(data);
+			actions.add(data);
 		}
 	};
 
@@ -136,102 +147,137 @@ export const PageToDOList = () => {
 		});
 	};
 
+	const filterTasks = () => {
+		return todoList.filter((task) => {
+			const matchesSearchTerm =
+				task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				task.description.toLowerCase().includes(searchTerm.toLowerCase());
+
+			const matchesStatus = statusFilter ? task.status === statusFilter : true;
+
+			const matchesPriority = priorityFilter
+				? task.priority === priorityFilter
+				: true;
+
+			const matchesDate = dateFilter ? task.date === dateFilter : true;
+
+			return matchesSearchTerm && matchesStatus && matchesPriority && matchesDate;
+		});
+	};
+
+	const handleSearchTask = debounce(
+		(event: React.ChangeEvent<HTMLInputElement>) => {
+			const value = event.target.value;
+			setSearchTerm(value);
+		},
+		500,
+		false
+	);
+
 	return (
-		<div className={`container ${style.pageToDoList}`}>
-			<h1>TODO LIST</h1>
-			<div className='top'>
-				<div className='search'>
-					<input type='text' placeholder='Pesquisar tarefa' />
+		<div className={`page ${style.pageToDoList}`}>
+			<div className='container'>
+				<h1 className='title'>TODO LIST</h1>
+				<div className={style.top}>
+					<Button type='button' variant='small' onClick={handleClick}>
+						<Icons.add />
+						Criar Tarefa
+					</Button>
+					<div className='search'>
+						<Input
+							type='text'
+							placeholder='Pesquisar tarefa'
+							onChange={handleSearchTask}
+						/>
+					</div>
+					<div className={style.filters}>
+						<Select
+							label='Status'
+							options={STATUS}
+							onChange={(e) => setStatusFilter(e.target.value)}
+						/>
+						<Select
+							label='Prioridade'
+							options={PRIORITIES}
+							onChange={(e) => setPriorityFilter(e.target.value)}
+						/>
+						<Input
+							label='Data'
+							type='date'
+							onChange={(e) => setDateFilter(e.target.value)}
+						/>
+					</div>
 				</div>
 
-				<Button type='button' onClick={handleClick}>
-					Criar Tarefa
-				</Button>
-			</div>
-
-			<Modal isOpen={isOpen} onClose={handleClose}>
-				<form className={style.form} onSubmit={handleSubmit(handleFormSubmit)}>
-					<Input
-						placeholder='Título'
-						type='text'
-						register={register('title')}
-					/>
-					{errors.title && <span>{errors.title.message}</span>}
-
-					<Input
-						placeholder='Descrição'
-						type='text'
-						register={register('description')}
-					/>
-					{errors.description && <span>{errors.description.message}</span>}
-
-					<Input placeholder='Data' type='date' register={register('date')} />
-					{errors.date && <span>{errors.date.message}</span>}
-
-					<Select register={register('status')} label='Status' options={STATUS}>
-						{errors.status && <span>{errors.status.message}</span>}
-					</Select>
-
-					<Select
-						register={register('priority')}
-						label='Prioridade'
-						options={PRIORITIES}
+				<Modal isOpen={isOpen} onClose={handleClose}>
+					<form
+						className={style.form}
+						onSubmit={handleSubmit(handleFormSubmit)}
 					>
-						{errors.priority && <span>{errors.priority.message}</span>}
-					</Select>
+						<Input
+							label='Título'
+							placeholder='Digite...'
+							type='text'
+							register={register('title')}
+						>
+							{errors.title && <span>{errors.title.message}</span>}
+						</Input>
 
-					<Button type='submit'>
-						{editingTask ? 'Salvar Alterações' : 'Adicionar Tarefa'}
-					</Button>
-				</form>
-			</Modal>
+						<Input
+							label='Descrição'
+							placeholder='Digite...'
+							type='text'
+							register={register('description')}
+						>
+							{errors.description && (
+								<span>{errors.description.message}</span>
+							)}
+						</Input>
 
-			<div className='content'>
-				<table className={style.table}>
-					<thead className={style.head}>
-						<tr className={style.tr}>
-							<th className={style.th}>Título</th>
-							<th className={style.th}>Descrição</th>
-							<th className={style.th}>Data</th>
-							<th className={style.th}>Prioridade</th>
-							<th className={style.th}>Status</th>
-							<th className={style.th}>Ações</th>
-						</tr>
-					</thead>
-					<tbody>
-						{todoList.map((task) => (
-							<tr key={task.id} className={style.tr}>
-								<td className={style.td}>{utils.truncate(task.title)}</td>
-								<td className={style.td}>
-									{utils.truncate(task.description)}
-								</td>
-								<td className={style.td}>{task.date}</td>
-								<td className={style.td}>{task.priority}</td>
-								<td className={style.td}>{task.status}</td>
-								<td className={style.td}>
-									<button
-										className={style.button}
-										onClick={() => openEditForm(task)}
-									>
-										Editar
-									</button>
-									<button
-										className={style.button}
-										onClick={() => handleRemove(task.id)}
-									>
-										Remover
-									</button>
-									<Link
-										to={`/task/${task.id}`}
-										className={style.button}
-									>
-										Ver página
-									</Link>
-								</td>
-							</tr>
-						))}
-					</tbody>
-				</table>
+						<Input
+							label='Data'
+							placeholder='Digite...'
+							type='date'
+							register={register('date')}
+						>
+							{errors.date && <span>{errors.date.message}</span>}
+						</Input>
+
+						<Select
+							register={register('status')}
+							label='Status'
+							options={STATUS}
+						>
+							{errors.status && <span>{errors.status.message}</span>}
+						</Select>
+
+						<Select
+							register={register('priority')}
+							label='Prioridade'
+							options={PRIORITIES}
+						>
+							{errors.priority && <span>{errors.priority.message}</span>}
+						</Select>
+
+						<InputFile setValue={setValue} register={register('attachment')}>
+							{errors.attachment && (
+								<span>{errors.attachment.message}</span>
+							)}
+						</InputFile>
+
+						<Button type='submit'>
+							{editingTask ? 'Salvar Alterações' : 'Adicionar Tarefa'}
+						</Button>
+					</form>
+				</Modal>
+
+				<div className={style.tableWrapper}>
+					<TableTask
+						onEdit={actions.edit}
+						onRemove={actions.remove}
+						searchTerm={filterTasks()}
+					/>
+				</div>
 			</div>
 		</div>
 	);

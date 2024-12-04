@@ -3,14 +3,23 @@ import style from './style.module.css';
 
 type Props = {
 	placeholder?: string;
+	label?: string;
 	type: string;
 	children?: React.ReactNode;
 	register?: UseFormRegisterReturn; // Tipo correto para o register
 } & React.InputHTMLAttributes<HTMLInputElement>;
 
-export const Input = ({ children, placeholder, type, register, ...rest }: Props) => {
+export const Input = ({
+	children,
+	label,
+	placeholder,
+	type,
+	register,
+	...rest
+}: Props) => {
 	return (
 		<div className={style.inputField}>
+			<label className={style.label}>{label}</label>
 			<input
 				className={style.input}
 				placeholder={placeholder}

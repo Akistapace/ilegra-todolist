@@ -3,18 +3,22 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import useAuthControl from './store/userAuthControl';
 import Layout from './ui/Layout/Layout';
 import { Pages } from './pages';
+
 interface ChallengProp {
 	children: ReactNode;
 }
-const ChallengeAuth = ({ children }: ChallengProp) => {
+const PrivateRoute = ({ children }: ChallengProp) => {
 	const isAuthenticated = useAuthControl((state) => state.isAuthenticated);
 
-	return isAuthenticated ? children : <Navigate to='/' />;
+	if (!isAuthenticated) return <Navigate to='/login' />;
+
+	return children;
 };
+
 function App() {
 	return (
-		<Layout>
-			<Router>
+		<Router>
+			<Layout>
 				<Routes>
 					<Route path='/' element={<Pages.home />} />
 					<Route path='/login' element={<Pages.login />} />
@@ -22,16 +26,24 @@ function App() {
 					<Route
 						path='/to-do-list'
 						element={
-							<ChallengeAuth>
+							<PrivateRoute>
 								<Pages.toDoList />
-							</ChallengeAuth>
+							</PrivateRoute>
 						}
 					/>
-					<Route path='/task/:id' element={<Pages.task />} />
+
+					<Route
+						path='/task/:id'
+						element={
+							<PrivateRoute>
+								<Pages.task />
+							</PrivateRoute>
+						}
+					/>
 					<Route path='*' element={<Pages.notFound />} />
 				</Routes>
-			</Router>
-		</Layout>
+			</Layout>
+		</Router>
 	);
 }
 

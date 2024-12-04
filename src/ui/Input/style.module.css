@@ -2,18 +2,21 @@
 	display: flex;
 	flex-direction: column;
 	margin-bottom: 10px;
-}
-.input {
-	padding: 15px;
 	width: 100%;
 	max-width: 300px;
-	border-radius: 8px;
-	border: 1px solid #ccc;
-	font-size: 12px;
-	outline: none;
-}
-
-.input::placeholder {
-	font-size: 12px;
+	.input {
+		padding: 15px;
+		width: 100%;
+		border-radius: 8px;
+		border: 1px solid #ccc;
+		font-size: 12px;
+		outline: none;
+		&::placeholder {
+			font-size: 12px;
+		}
+	}
+	.label {
+		font-size: 12px;
+	}
 }
 

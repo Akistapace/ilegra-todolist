@@ -2,7 +2,12 @@
 	"files": [],
 	"references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }],
 	"compilerOptions": {
-		"typeRoots": ["./node_modules/@types", "./src/typings"]
-	}
+		"typeRoots": ["./node_modules/@types", "./src/typings"],
+		"baseUrl": ".",
+		"paths": {
+			"@/*": ["src/*"]
+		}
+	},
+	"include": ["./jest-setup.ts"]
 }
 

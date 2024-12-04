@@ -1,26 +1,24 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FormLogin } from '../../components/FormLogin';
+import { FormRegister } from '../../components/FormRegister';
 import useAuthControl from '../../store/userAuthControl';
 import style from './style.module.css';
 export const PageRegister = () => {
+	const isAuthenticated = useAuthControl((state) => state.isAuthenticated);
 	const navigate = useNavigate();
-	const login = useAuthControl((state) => state.login);
 
-	const handleLogin = () => {
-		login(); // Simulate login
-		// Add logic for actual authentication
-		navigate('/to-do-list');
-		console.log('redirect');
-	};
+	useEffect(() => {
+		if (isAuthenticated) navigate('/to-do-list');
+	}, [isAuthenticated]);
+
 	return (
-		<div className={`container ${style.pageRegister}`}>
+		<div className={`page ${style.pageRegister}`}>
 			<div className={`${style.block} ${style.blockLeft}`}>
-				<FormLogin />
-				<button onClick={handleLogin}>Log In</button>
+				<FormRegister />
 			</div>
 			<div className={`${style.block} ${style.blockRight}`}>
-				<p>Teste Ilegra</p>
-				<p>Cadastro</p>
+				<h1 className='title'>Ilegra Test</h1>
+				<p>Sign in</p>
 			</div>
 		</div>
 	);

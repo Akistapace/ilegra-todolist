@@ -1,26 +1,24 @@
-import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { FormLogin } from '../../components/FormLogin';
 import useAuthControl from '../../store/userAuthControl';
 import style from './style.module.css';
+import { useNavigate } from 'react-router-dom';
 export const PageLogin = () => {
+	const isAuthenticated = useAuthControl((state) => state.isAuthenticated);
 	const navigate = useNavigate();
-	const login = useAuthControl((state) => state.login);
 
-	const handleLogin = () => {
-		login(); // Simulate login
-		// Add logic for actual authentication
-		navigate('/to-do-list');
-		console.log('redirect');
-	};
+	useEffect(() => {
+		if (isAuthenticated) navigate('/to-do-list');
+	}, [isAuthenticated]);
+
 	return (
-		<div className={`container ${style.pageLogin}`}>
+		<div className={`page ${style.pageLogin}`}>
 			<div className={`${style.block} ${style.blockLeft}`}>
-				<p>Teste Ilegra</p>
+				<h1 className='title'>Ilegra Test</h1>
 				<p>Login</p>
 			</div>
 			<div className={`${style.block} ${style.blockRight}`}>
 				<FormLogin />
-				<button onClick={handleLogin}>Log In</button>
 			</div>
 		</div>
 	);

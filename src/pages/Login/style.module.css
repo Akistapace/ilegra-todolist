@@ -12,14 +12,28 @@
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
+	padding: 20px;
 }
 .blockLeft {
 	background-color: #000;
 	color: #fff;
 }
-
 .blockRight {
 	background-color: #fff;
 	color: #000;
+}
+@media (max-width: 768px) {
+	.pageLogin {
+		flex-direction: column;
+		justify-content: flex-start;
+	}
+	.blockLeft {
+		width: 100%;
+		background-color: #fff;
+		color: #000;
+	}
+	.blockRight {
+		width: 100%;
+	}
 }
 

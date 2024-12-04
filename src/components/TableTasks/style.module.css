@@ -1,0 +1,16 @@
+.actions {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	column-gap: 10px;
+	span {
+		cursor: pointer;
+		margin: 0 5px;
+	}
+	svg {
+		width: 20px;
+		height: 20px;
+		color: #000;
+	}
+}
+

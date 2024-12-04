@@ -7,15 +7,21 @@ export const PageHome = () => {
 	const handleNavigate = (page: string) => navigate(page);
 
 	return (
-		<div className={`container ${style.pageHome}`}>
-			<div>
-				<Button type='button' onClick={() => handleNavigate('/login')}>
-					Entrar
-				</Button>
-				<Button type='button' onClick={() => handleNavigate('/register')}>
-					Cadastrar
-				</Button>
-			</div>
+		<div className={`page ${style.pageHome}`}>
+			<Button
+				type='button'
+				variant='medium'
+				onClick={() => handleNavigate('/login')}
+			>
+				Login
+			</Button>
+			<Button
+				type='button'
+				variant='medium'
+				onClick={() => handleNavigate('/register')}
+			>
+				Sign in
+			</Button>
 		</div>
 	);
 };
