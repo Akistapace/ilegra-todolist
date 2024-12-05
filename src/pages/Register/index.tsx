@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { FormRegister } from '../../components/FormRegister';
 import useAuthControl from '../../store/userAuthControl';
 import style from './style.module.css';
-export const PageRegister = () => {
-	const isAuthenticated = useAuthControl((state) => state.isAuthenticated);
+const PageRegister = () => {
+	const { isAuthenticated } = useAuthControl();
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -23,4 +23,6 @@ export const PageRegister = () => {
 		</div>
 	);
 };
+
+export default PageRegister;
 

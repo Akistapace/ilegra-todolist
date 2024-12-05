@@ -9,7 +9,6 @@ interface Task {
 	date: string;
 	priority: 'Alta' | 'Medium' | 'Baixa';
 	status: 'Pendente' | 'Concluído' | 'À fazer';
-	attachment?: File[] | null | undefined;
 }
 
 interface TodoStore {
@@ -23,20 +22,23 @@ export const useTodoStore = create(
 	persist<TodoStore>(
 		(set) => ({
 			todoList: [],
-			addTask: (task) =>
+			addTask: (task) => {
 				set((state) => ({
 					todoList: [...state.todoList, { ...task, id: uuidv4() }],
-				})),
-			editTask: (task) =>
+				}));
+			},
+			editTask: (task) => {
 				set((state) => ({
 					todoList: state.todoList.map((t) =>
 						t.id === task.id ? { ...t, ...task } : t
 					),
-				})),
-			removeTask: (id) =>
+				}));
+			},
+			removeTask: (id) => {
 				set((state) => ({
 					todoList: state.todoList.filter((task) => task.id !== id),
-				})),
+				}));
+			},
 		}),
 		{
 			name: 'todo-storage',

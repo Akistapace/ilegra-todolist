@@ -1,50 +1,63 @@
-# React + TypeScript + Vite
+# To Do List - Teste Ilegra
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Este é um projeto de uma aplicação de lista de tarefas (To Do List) desenvolvido como parte de um teste para a Ilegra. A aplicação permite ao usuário adicionar, editar e excluir tarefas, com persistência local no navegador .
 
-Currently, two official plugins are available:
+## Tecnologias Utilizadas
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **React**: Utilizado para construção da interface do usuário de maneira declarativa e eficiente.
+- **Zustand**: Escolhido para o gerenciamento de estado devido à sua simplicidade e desempenho. Zustand oferece uma maneira eficiente de gerenciar o estado sem a complexidade do Redux.
 
-## Expanding the ESLint configuration
+- **React Hook Form**: Utilizado para facilitar a manipulação e validação de formulários. Ele reduz a quantidade de código necessário e melhora a performance da aplicação, especialmente em formulários com muitos campos.
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+- **Zod**: Uma biblioteca de validação e parsing de dados que é usada em conjunto com o React Hook Form para garantir que os dados dos formulários sejam válidos antes de serem submetidos. A escolha do Zod oferece uma maneira simples e declarativa de validar os dados.
 
-- Configure the top-level `parserOptions` property like this:
+- **CSS Modules**: Utilizado para isolar o escopo de estilos de cada componente, evitando conflitos globais e garantindo um estilo modular e reutilizável.
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+- **Jest / Testing Library**: Para garantir a qualidade e estabilidade do código, os testes automatizados são feitos com Jest e React Testing Library. Essas ferramentas ajudam a garantir que a aplicação funcione corretamente e que as interações com os componentes sejam testadas de forma eficiente.
+
+## Performance
+
+Foi utilizado boas práticas do react e otimizações como:
+
+- Debounce no campo de busca para evitar renderizações durante a digitação
+- Lazy e Suspense para carregamento dinamico das rotas e para carregamento de modal de criação
+
+## Como Rodar o Projeto
+
+### Pré-requisitos
+
+Certifique-se de ter o Node.js na versão **v20.17.0** ou superior instalado em sua máquina.
+
+### Passos
+
+1. Clone o projeto
+2. Instale as dependências:
+
+```bash
+npm install
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+2. Inicie a aplicação em modo de desenvolvimento:
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+```bash
+npm run dev
 ```
+
+### Como rodar os testes
+
+Rodar a cobertura de testes (gera um relatório de cobertura):
+
+```bash
+npm run coverage
+```
+
+Rodar os testes:
+
+```bash
+npm run test
+```
+
+## Autor:
+
+Fernando Aquistapace
+

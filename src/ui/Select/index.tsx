@@ -12,13 +12,13 @@ type Props = {
 	register?: UseFormRegisterReturn; // Tipo correto para o register
 	options: Option[];
 	label?: string;
-} & React.InputHTMLAttributes<HTMLInputElement>;
+} & React.InputHTMLAttributes<HTMLSelectElement>;
 
-export const Select = ({ children, register, options, label }: Props) => {
+export const Select = ({ children, register, options, label, ...rest }: Props) => {
 	return (
 		<div className={style.select}>
 			{label && <label className={style.label}>{label}</label>}
-			<select {...(register || {})}>
+			<select {...(register || {})} {...rest}>
 				{options.map((option) => (
 					<option key={option.value} value={option.value}>
 						{option.label}

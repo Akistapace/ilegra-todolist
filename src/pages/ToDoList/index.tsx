@@ -4,11 +4,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useTodoStore } from '../../store/useTodoList';
 import { debounce } from '../../utils/debounce';
 import { TableTask } from '../../components/TableTasks';
-import { Button, Input, InputFile, Modal, Select } from '../../ui';
+import { BulletFilter } from '../../components/BulletFilters';
+import { Button, Input, Modal, Select } from '../../ui';
 import { v4 as uuidv4 } from 'uuid';
 import z from 'zod';
 import style from './style.module.css';
-import { Icons } from '../../ui/Icons';
 
 const taskSchema = z.object({
 	id: z
@@ -23,86 +23,79 @@ const taskSchema = z.object({
 			/^\d{4}-\d{2}-\d{2}$/,
 			'O formato da data deve ser YYYY-MM-DD (ex.: 2024-01-01)'
 		),
-	priority: z.enum(['Alta', 'Medium', 'Baixa'], {
-		errorMap: () => ({ message: 'A prioridade deve ser Alta, Média ou Baixa' }),
-	}),
-	status: z.enum(['Pendente', 'Concluído', 'À fazer'], {
-		errorMap: () => ({ message: 'O status deve ser Pendentee ou Concluído' }),
-	}),
-	attachment: z
-		.array(z.instanceof(File)) // Aceita um array de arquivos
-		.nullable()
-		.optional()
-		.refine(
-			(files) => !files || files.every((file) => file.type.startsWith('image/')),
-			'Todos os arquivos devem ser imagens'
-		)
-		.refine(
-			(files) => !files || files.every((file) => file.size <= 5 * 1024 * 1024),
-			'Cada arquivo deve ter no máximo 5MB'
-		),
+	priority: z.enum(['Alta', 'Medium', 'Baixa']),
+	status: z.enum(['Pendente', 'Concluído', 'À fazer']),
 });
 
 type Task = z.infer<typeof taskSchema>;
 
 const STATUS = [
+	{ label: 'Todos', value: '' },
 	{ label: 'Pendente', value: 'Pendente' },
 	{ label: 'À fazer', value: 'À fazer' },
-	{ label: 'Concluido', value: 'Concluído' },
+	{ label: 'Concluído', value: 'Concluído' },
 ];
 
 const PRIORITIES = [
+	{ label: 'Todos', value: '' },
 	{ label: 'Alta', value: 'Alta' },
 	{ label: 'Baixa', value: 'Baixa' },
 	{ label: 'Média', value: 'Medium' },
 ];
 
-export const PageToDOList = () => {
+const PageToDOList = () => {
 	const [isOpen, setIsOpen] = useState(false);
 	const [searchTerm, setSearchTerm] = useState('');
-	const [statusFilter, setStatusFilter] = useState<string | ''>('');
-	const [priorityFilter, setPriorityFilter] = useState<string | ''>('');
+	const [statusFilter, setStatusFilter] = useState<
+		'Pendente' | 'Concluído' | 'À fazer' | ''
+	>('');
+	const [priorityFilter, setPriorityFilter] = useState<
+		'Alta' | 'Medium' | 'Baixa' | ''
+	>('');
 	const [dateFilter, setDateFilter] = useState<string | ''>('');
 	const [editingTask, setEditingTask] = useState<Task | null>(null);
-	const { todoList, addTask, editTask, removeTask } = useTodoStore();
+	const todoStore = useTodoStore();
 	const {
 		register,
 		handleSubmit,
 		reset,
-		setValue,
 		formState: { errors },
 	} = useForm<Task>({
 		resolver: zodResolver(taskSchema),
 	});
 
+	const resetFormAndCloseModal = (state: boolean) => {
+		reset({
+			title: '',
+			description: '',
+			date: '',
+			priority: 'Alta',
+			status: 'Pendente',
+		});
+		setIsOpen(state);
+	};
+
 	const actions = {
-		remove: (id: string) => removeTask(id),
+		remove: (id: string) => todoStore.removeTask(id),
 		add: (data: Omit<Task, 'id'>) => {
 			const newTask: Task = { ...data, id: uuidv4() };
 
-			addTask(newTask);
+			todoStore.addTask(newTask);
 
 			setTimeout(() => {
-				reset({
-					title: '',
-					description: '',
-					date: '',
-					priority: 'Alta',
-					status: 'Pendente',
-				});
-				setIsOpen(false);
+				resetFormAndCloseModal(false);
 			}, 300);
 		},
 		edit: (task: Task) => {
 			setEditingTask(task);
 			setIsOpen(true);
+
 			reset(task);
 		},
 	};
 
 	const handleEditTask = (task: Task) => {
-		editTask(task);
-
+		todoStore.editTask(task);
 		setTimeout(() => {
 			reset({
 				title: '',
@@ -117,6 +110,7 @@ export const PageToDOList = () => {
 	};
 
 	const handleFormSubmit = (data: Omit<Task, 'id'>) => {
+		console.log();
 		if (editingTask) {
 			handleEditTask({ ...data, id: editingTask.id });
 		} else {
@@ -126,35 +120,20 @@ export const PageToDOList = () => {
 
 	const handleClick = () => {
 		setEditingTask(null);
-		setIsOpen(true);
-		reset({
-			title: '',
-			description: '',
-			date: '',
-			priority: 'Alta',
-			status: 'Pendente',
-		});
+		resetFormAndCloseModal(true);
 	};
 
 	const handleClose = () => {
-		setIsOpen(false);
-		reset({
-			title: '',
-			description: '',
-			date: '',
-			priority: 'Alta',
-			status: 'Pendente',
-		});
+		resetFormAndCloseModal(false);
 	};
 
 	const filterTasks = () => {
-		return todoList.filter((task) => {
+		return todoStore.todoList.filter((task) => {
 			const matchesSearchTerm =
 				task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
 				task.description.toLowerCase().includes(searchTerm.toLowerCase());
 
 			const matchesStatus = statusFilter ? task.status === statusFilter : true;
-
 			const matchesPriority = priorityFilter
 				? task.priority === priorityFilter
 				: true;
@@ -169,107 +148,125 @@ export const PageToDOList = () => {
 		(event: React.ChangeEvent<HTMLInputElement>) => {
 			const value = event.target.value;
 			setSearchTerm(value);
+			console.log('search', value);
 		},
 		500,
 		false
 	);
+
+	const handleStatusFilter = (value: string) => {
+		console.log('handleStatusFilter');
+		setStatusFilter(value as 'Pendente' | 'Concluído' | 'À fazer' | '');
+	};
+
+	const handlePriorityFilter = (value: string) => {
+		console.log('handlePriorityFilter');
+		setPriorityFilter(value as 'Alta' | 'Medium' | 'Baixa' | '');
+	};
 
 	return (
 		<div className={`page ${style.pageToDoList}`}>
 			<div className='container'>
 				<h1 className='title'>TODO LIST</h1>
 				<div className={style.top}>
-					<Button type='button' variant='small' onClick={handleClick}>
-						<Icons.add />
-						Criar Tarefa
-					</Button>
-					<div className='search'>
+					<Modal isOpen={isOpen} onClose={handleClose} onClick={handleClick}>
+						<form
+							className={style.form}
+							onSubmit={handleSubmit(handleFormSubmit)}
+							data-testid='form-task'
+						>
+							<Input
+								label='Título'
+								placeholder='Digite...'
+								type='text'
+								register={register('title')}
+								data-testid='title'
+							>
+								{errors.title && <span>{errors.title.message}</span>}
+							</Input>
+
+							<Input
+								label='Descrição'
+								placeholder='Digite...'
+								type='text'
+								register={register('description')}
+								data-testid='description'
+							>
+								{errors.description && (
+									<span>{errors.description.message}</span>
+								)}
+							</Input>
+
+							<Input
+								label='Data'
+								placeholder='Digite...'
+								type='date'
+								register={register('date')}
+								data-testid='date'
+							>
+								{errors.date && <span>{errors.date.message}</span>}
+							</Input>
+
+							<Select
+								register={register('status')}
+								label='Status'
+								options={STATUS.filter((item) => item.label !== 'Todos')}
+								data-testid='status'
+							>
+								{errors.status && <span>{errors.status.message}</span>}
+							</Select>
+
+							<Select
+								register={register('priority')}
+								label='Prioridade'
+								options={PRIORITIES.filter(
+									(item) => item.label !== 'Todos'
+								)}
+								data-testid='priority'
+							>
+								{errors.priority && (
+									<span>{errors.priority.message}</span>
+								)}
+							</Select>
+
+							<Button type='submit' data-testid='submit'>
+								{editingTask ? 'Salvar Alterações' : 'Adicionar Tarefa'}
+							</Button>
+						</form>
+					</Modal>
+
+					<div className={style.filters}>
 						<Input
+							label='Pesquisar'
 							type='text'
 							placeholder='Pesquisar tarefa'
 							onChange={handleSearchTask}
+							data-testid='search'
 						/>
-					</div>
-					<div className={style.filters}>
-						<Select
-							label='Status'
-							options={STATUS}
-							onChange={(e) => setStatusFilter(e.target.value)}
-						/>
-						<Select
-							label='Prioridade'
-							options={PRIORITIES}
-							onChange={(e) => setPriorityFilter(e.target.value)}
-						/>
+
+						<BulletFilter.root>
+							<BulletFilter.title>Status</BulletFilter.title>
+							<BulletFilter.bullets
+								bullets={STATUS}
+								nameFilter={statusFilter}
+								onclick={handleStatusFilter}
+							/>
+							<BulletFilter.title>Prioridade</BulletFilter.title>
+							<BulletFilter.bullets
+								bullets={PRIORITIES}
+								nameFilter={priorityFilter}
+								onclick={handlePriorityFilter}
+							/>
+						</BulletFilter.root>
+
 						<Input
 							label='Data'
 							type='date'
 							onChange={(e) => setDateFilter(e.target.value)}
+							data-testid='filter-date'
 						/>
 					</div>
 				</div>
-
-				<Modal isOpen={isOpen} onClose={handleClose}>
-					<form
-						className={style.form}
-						onSubmit={handleSubmit(handleFormSubmit)}
-					>
-						<Input
-							label='Título'
-							placeholder='Digite...'
-							type='text'
-							register={register('title')}
-						>
-							{errors.title && <span>{errors.title.message}</span>}
-						</Input>
-
-						<Input
-							label='Descrição'
-							placeholder='Digite...'
-							type='text'
-							register={register('description')}
-						>
-							{errors.description && (
-								<span>{errors.description.message}</span>
-							)}
-						</Input>
-
-						<Input
-							label='Data'
-							placeholder='Digite...'
-							type='date'
-							register={register('date')}
-						>
-							{errors.date && <span>{errors.date.message}</span>}
-						</Input>
-
-						<Select
-							register={register('status')}
-							label='Status'
-							options={STATUS}
-						>
-							{errors.status && <span>{errors.status.message}</span>}
-						</Select>
-
-						<Select
-							register={register('priority')}
-							label='Prioridade'
-							options={PRIORITIES}
-						>
-							{errors.priority && <span>{errors.priority.message}</span>}
-						</Select>
-
-						<InputFile setValue={setValue} register={register('attachment')}>
-							{errors.attachment && (
-								<span>{errors.attachment.message}</span>
-							)}
-						</InputFile>
-
-						<Button type='submit'>
-							{editingTask ? 'Salvar Alterações' : 'Adicionar Tarefa'}
-						</Button>
-					</form>
-				</Modal>
 
 				<div className={style.tableWrapper}>
 					<TableTask
@@ -282,4 +279,6 @@ export const PageToDOList = () => {
 		</div>
 	);
 };
+
+export default PageToDOList;
 

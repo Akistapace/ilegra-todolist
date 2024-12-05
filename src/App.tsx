@@ -1,8 +1,14 @@
-import { ReactNode } from 'react';
+import { ReactNode, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import useAuthControl from './store/userAuthControl';
 import Layout from './ui/Layout/Layout';
-import { Pages } from './pages';
+
+const PageHome = lazy(() => import('./pages/Home'));
+const PageLogin = lazy(() => import('./pages/Login'));
+const PageRegister = lazy(() => import('./pages/Register'));
+const PageTask = lazy(() => import('./pages/Task'));
+const PageToDOList = lazy(() => import('./pages/TodoList'));
+const PageNotFound = lazy(() => import('./pages/NotFound'));
 
 interface ChallengProp {
 	children: ReactNode;
@@ -19,29 +25,33 @@ function App() {
 	return (
 		<Router>
 			<Layout>
-				<Routes>
-					<Route path='/' element={<Pages.home />} />
-					<Route path='/login' element={<Pages.login />} />
-					<Route path='/register' element={<Pages.register />} />
-					<Route
-						path='/to-do-list'
-						element={
-							<PrivateRoute>
-								<Pages.toDoList />
-							</PrivateRoute>
-						}
-					/>
+				<Suspense
+					fallback={<div className={`page page-loading`}>Carregando...</div>}
+				>
+					<Routes>
+						<Route path='/' element={<PageHome />} />
+						<Route path='/login' element={<PageLogin />} />
+						<Route path='/register' element={<PageRegister />} />
+						<Route
+							path='/to-do-list'
+							element={
+								<PrivateRoute>
+									<PageToDOList />
+								</PrivateRoute>
+							}
+						/>
 
-					<Route
-						path='/task/:id'
-						element={
-							<PrivateRoute>
-								<Pages.task />
-							</PrivateRoute>
-						}
-					/>
-					<Route path='*' element={<Pages.notFound />} />
-				</Routes>
+						<Route
+							path='/task/:id'
+							element={
+								<PrivateRoute>
+									<PageTask />
+								</PrivateRoute>
+							}
+						/>
+						<Route path='*' element={<PageNotFound />} />
+					</Routes>
+				</Suspense>
 			</Layout>
 		</Router>
 	);

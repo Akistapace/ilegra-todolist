@@ -10,7 +10,7 @@ export function debounce<T extends (...args: any[]) => void>(
 	return (...args: Parameters<T>) => {
 		const invokeFunc = () => {
 			lastInvokeTime = Date.now();
-			func(...args); // Chama a função diretamente sem a necessidade de `this` ou `.apply`
+			func(...args);
 		};
 
 		const shouldInvoke = immediate && !lastInvokeTime;

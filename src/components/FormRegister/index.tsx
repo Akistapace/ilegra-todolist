@@ -36,11 +36,11 @@ export const FormRegister = () => {
 		resolver: zodResolver(userSchema),
 	});
 	const navigate = useNavigate();
-	const registerUser = useAuthControl((state) => state.register);
+	const registerUser = useAuthControl();
 
 	const onSubmit = (data: formData) => {
 		/* istanbul ignore next */
-		registerUser(data);
+		registerUser.register(data);
 		navigate('/login');
 	};
 

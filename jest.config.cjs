@@ -10,5 +10,12 @@ module.exports = {
 		'^.+\\.(ts|tsx|js|jsx)$': 'babel-jest',
 	},
 	setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+	coveragePathIgnorePatterns: [
+		'/node_modules/',
+		'/store/',
+		'/utils/',
+		'/tests/',
+		'/ui/',
+	],
 };
 

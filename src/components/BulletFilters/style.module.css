@@ -1,0 +1,31 @@
+.filterButtons {
+	row-gap: 5px;
+	display: flex;
+	flex-direction: column;
+}
+.filterButtonGroup {
+	display: flex;
+	flex-wrap: wrap;
+	row-gap: 10px;
+	margin-bottom: 5px;
+}
+.filterTitle {
+	font-size: 12px;
+}
+.bullet {
+	background: #000;
+	color: #fff;
+	border: 1px solid #000;
+	font-weight: 700;
+	font-size: 12px;
+	padding: 3px 8px;
+	border-radius: 10px;
+	margin: 0 5px;
+	display: inline-flex;
+}
+.bulletActive {
+	border-color: #000;
+	background: #fff;
+	color: #000;
+}
+

@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FormLogin } from '../../components/FormLogin';
 import useAuthControl from '../../store/userAuthControl';
 import style from './style.module.css';
-import { useNavigate } from 'react-router-dom';
-export const PageLogin = () => {
-	const isAuthenticated = useAuthControl((state) => state.isAuthenticated);
+const PageLogin = () => {
+	const { isAuthenticated } = useAuthControl();
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -23,4 +23,6 @@ export const PageLogin = () => {
 		</div>
 	);
 };
+
+export default PageLogin;
 

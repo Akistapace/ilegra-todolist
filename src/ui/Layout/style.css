@@ -6,6 +6,11 @@
 	box-sizing: border-box;
 	font-family: Arial, sans-serif;
 }
+.page-loading {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
 .body {
 	min-height: 100vh;
 	width: 100%;
@@ -62,11 +67,37 @@
 .container {
 	width: 100%;
 	max-width: 1400px;
-	margin: auto;
+	margin: 0 auto;
 	padding: 20px;
 }
 
 .page {
 	width: 100%;
+}
+
+.error {
+	font-size: 12px;
+	color: red;
+	margin-top: 5px;
+}
+
+@media (max-width: 768px) {
+	.header {
+		min-height: 50px;
+		padding: 15px;
+	}
+	.header > a {
+		margin-left: 0;
+		font-size: 14px;
+		white-space: nowrap;
+	}
+	.header button {
+		margin-right: 0;
+		font-size: 12px;
+		white-space: nowrap;
+	}
+	.header strong {
+		text-align: right;
+	}
 }
 

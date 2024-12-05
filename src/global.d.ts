@@ -12,7 +12,7 @@ declare global {
 		date: string;
 		priority: string;
 		status: string;
-		attachment: string;
+		attachment: File | null;
 	};
 }
 

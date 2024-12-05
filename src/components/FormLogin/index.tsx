@@ -26,10 +26,10 @@ export const FormLogin = () => {
 	});
 
 	const navigate = useNavigate();
-	const login = useAuthControl((state) => state.login);
+	const login = useAuthControl();
 
 	const onSubmit = (data: formData) => {
-		const error = login(data.email, data.password);
+		const error = login.login(data.email, data.password);
 		if (error) {
 			setErrorMessage(error);
 		} else {
@@ -50,8 +50,9 @@ export const FormLogin = () => {
 				register={register('email')}
 				data-testid='email'
 			>
-				{errors.email && <span>{errors.email.message}</span>}
+				{errors.email && <span className='error'>{errors.email.message}</span>}
 			</Input>
+
 			<Input
 				label='Senha'
 				placeholder='Digite...'
@@ -59,10 +60,12 @@ export const FormLogin = () => {
 				register={register('password')}
 				data-testid='password'
 			>
-				{errors.password && <span>{errors.password.message}</span>}
+				{errors.password && (
+					<span className='error'>{errors.password.message}</span>
+				)}
 			</Input>
 
-			{errorMessage && <p className={style.error}>{errorMessage}</p>}
+			{errorMessage && <span className='error'>{errorMessage}</span>}
 
 			<Button type='submit' variant='large' loading={false}>
 				Entrar
